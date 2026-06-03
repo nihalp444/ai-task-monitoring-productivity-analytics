@@ -1,0 +1,49 @@
+<div class="bg">
+  <div class="card">
+    <div class="logo">
+      <span class="logo-icon">✦</span>
+      <h1>TaskAI</h1>
+    </div>
+    <p class="subtitle">Create your account</p>
+
+    <div class="row">
+      <div class="field">
+        <label>First Name</label>
+        <input type="text" placeholder="John" [(ngModel)]="firstName" />
+      </div>
+      <div class="field">
+        <label>Last Name</label>
+        <input type="text" placeholder="Doe" [(ngModel)]="lastName" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Email <span class="hint">(used as username)</span></label>
+      <input type="email" placeholder="john@example.com" [(ngModel)]="email" />
+    </div>
+
+    <div class="field">
+      <label>Mobile Number</label>
+      <input type="tel" placeholder="+91 9876543210" [(ngModel)]="mobile" />
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••" [(ngModel)]="password" />
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" placeholder="••••••••" [(ngModel)]="confirmPassword" />
+      </div>
+    </div>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <button class="btn" (click)="signup()" [disabled]="loading">
+      {{ loading ? 'Creating Account...' : 'Create Account →' }}
+    </button>
+
+    <p class="footer">Already have an account? <a routerLink="/">Sign in</a></p>
+  </div>
+</div>

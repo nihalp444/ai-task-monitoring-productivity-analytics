@@ -1,0 +1,151 @@
+<!-- Toast -->
+<div class="toast" *ngIf="toast" [class.toast-success]="toast.type==='success'" [class.toast-error]="toast.type==='error'">
+  {{ toast.message }}
+</div>
+
+<!-- Complete Modal -->
+<div class="modal-backdrop" *ngIf="modalOpen" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <div class="modal-icon">✅</div>
+      <div>
+        <h3 class="modal-title">Complete Task</h3>
+        <p class="modal-sub">{{ modalTask?.title }}</p>
+      </div>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Focus Score -->
+      <div class="m-field">
+        <label class="m-label">Focus Score <span class="m-req">*</span></label>
+        <div class="star-row">
+          <button class="star-btn" *ngFor="let n of [1,2,3,4,5]"
+            [class.star-active]="n <= focusScore"
+            (click)="focusScore = n" type="button">★</button>
+          <span class="star-hint">{{ focusScore }}/5</span>
+        </div>
+      </div>
+
+      <!-- Distraction Count -->
+      <div class="m-field">
+        <label class="m-label">Distraction Count</label>
+        <div class="counter-row">
+          <button class="counter-btn" (click)="distractionCount = distractionCount > 0 ? distractionCount - 1 : 0" type="button">−</button>
+          <span class="counter-val">{{ distractionCount }}</span>
+          <button class="counter-btn" (click)="distractionCount = distractionCount + 1" type="button">+</button>
+        </div>
+      </div>
+
+      <p class="modal-err" *ngIf="modalError">{{ modalError }}</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeModal()" [disabled]="modalLoading">Cancel</button>
+      <button class="btn-confirm" (click)="submitComplete()" [disabled]="modalLoading">
+        <span class="spinner" *ngIf="modalLoading"></span>
+        <span>{{ modalLoading ? 'Saving...' : 'Submit' }}</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Page -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Task Tracker</h1>
+      <p class="page-sub">Manage, start, and complete your tasks</p>
+    </div>
+    <a routerLink="/tasks/create" class="btn-new">+ New Task</a>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button class="tab" [class.tab-active]="filter==='All'"         (click)="filter='All'">All <span class="tab-count">{{ counts.all }}</span></button>
+    <button class="tab" [class.tab-active]="filter==='Pending'"     (click)="filter='Pending'">Pending <span class="tab-count">{{ counts.pending }}</span></button>
+    <button class="tab" [class.tab-active]="filter==='In Progress'" (click)="filter='In Progress'">In Progress <span class="tab-count">{{ counts.inProgress }}</span></button>
+    <button class="tab" [class.tab-active]="filter==='Completed'"   (click)="filter='Completed'">Completed <span class="tab-count">{{ counts.completed }}</span></button>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div class="skeleton-list" *ngIf="pageLoading">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty" *ngIf="!pageLoading && filteredTasks.length === 0">
+    <span class="empty-icon">📭</span>
+    <p>No tasks found</p>
+    <a routerLink="/tasks/create" class="btn-new" style="margin-top:12px">Create your first task</a>
+  </div>
+
+  <!-- Task Cards -->
+  <div class="task-list" *ngIf="!pageLoading">
+    <div class="task-card"
+      *ngFor="let task of filteredTasks"
+      [class.card-progress]="task.status === 'In Progress'"
+      [class.card-done]="task.status === 'Completed'">
+
+      <!-- Left: info -->
+      <div class="card-left">
+
+        <div class="card-top">
+          <span class="task-title">{{ task.title }}</span>
+          <span class="priority-badge" [class]="priorityClass(task.priority)">{{ task.priority }}</span>
+        </div>
+
+        <div class="card-meta">
+          <span class="meta-chip">📁 {{ task.category }}</span>
+          <span class="meta-chip">⏱ {{ task.estimated_time }} min</span>
+          <span class="meta-chip" *ngIf="task.due_date && task.due_date !== 'None'">📅 {{ task.due_date | date:'MMM d' }}</span>
+        </div>
+
+        <!-- Live timer -->
+        <div class="live-timer" *ngIf="task.status === 'In Progress'">
+          <span class="timer-dot"></span>
+          <span class="timer-text">{{ formatElapsed(task._elapsed) }} elapsed</span>
+        </div>
+
+      </div>
+
+      <!-- Right: status + actions -->
+      <div class="card-right">
+
+        <span class="status-badge" [class]="statusClass(task.status)">{{ task.status }}</span>
+
+        <div class="card-actions">
+
+          <!-- Start -->
+          <button class="btn-start"
+            *ngIf="task.status === 'Pending'"
+            [disabled]="task._loading"
+            (click)="startTask(task)">
+            <span class="spinner-sm" *ngIf="task._loading"></span>
+            <span *ngIf="!task._loading">▶ Start</span>
+          </button>
+
+          <!-- Complete -->
+          <button class="btn-complete"
+            *ngIf="task.status === 'In Progress'"
+            [disabled]="task._loading"
+            (click)="openModal(task)">
+            ✅ Complete
+          </button>
+
+          <!-- Done label -->
+          <span class="done-label" *ngIf="task.status === 'Completed'">🎉 Done</span>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

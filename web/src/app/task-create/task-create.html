@@ -1,0 +1,110 @@
+<!-- Toast -->
+<div class="toast" *ngIf="toast" [class.toast-success]="toast.type === 'success'" [class.toast-error]="toast.type === 'error'">
+  {{ toast.message }}
+</div>
+
+<div class="page-wrap">
+  <div class="form-card">
+
+    <!-- Header -->
+    <div class="form-header">
+      <div class="form-icon">✦</div>
+      <div>
+        <h1 class="form-title">Create New Task</h1>
+        <p class="form-sub">Fill in the details to add a task to your board</p>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- Title -->
+      <div class="field" [class.field-error]="isInvalid('title')">
+        <label class="label">Task Title <span class="req">*</span></label>
+        <input formControlName="title" type="text" class="input" placeholder="e.g. Finish project report" />
+        <span class="err-msg" *ngIf="isInvalid('title')">
+          {{ f['title'].errors?.['required'] ? 'Title is required.' : 'Minimum 3 characters.' }}
+        </span>
+      </div>
+
+      <!-- Row: Category + Priority -->
+      <div class="field-row">
+
+        <div class="field" [class.field-error]="isInvalid('category')">
+          <label class="label">Category <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select formControlName="category" class="input">
+              <option value="" disabled selected>Select category</option>
+              <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+          <span class="err-msg" *ngIf="isInvalid('category')">Category is required.</span>
+        </div>
+
+        <div class="field" [class.field-error]="isInvalid('priority')">
+          <label class="label">Priority <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select formControlName="priority" class="input">
+              <option value="" disabled selected>Select priority</option>
+              <option *ngFor="let p of priorities" [value]="p">{{ p }}</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+          <span class="err-msg" *ngIf="isInvalid('priority')">Priority is required.</span>
+        </div>
+
+      </div>
+
+      <!-- Row: Estimated Time + Due Date -->
+      <div class="field-row">
+
+        <div class="field" [class.field-error]="isInvalid('estimated_time')">
+          <label class="label">Estimated Time (min) <span class="req">*</span></label>
+          <input formControlName="estimated_time" type="number" class="input" placeholder="e.g. 90" min="1" />
+          <span class="err-msg" *ngIf="isInvalid('estimated_time')">
+            {{ f['estimated_time'].errors?.['required'] ? 'Estimated time is required.' : 'Must be at least 1 minute.' }}
+          </span>
+        </div>
+
+        <div class="field" [class.field-error]="isInvalid('due_date')">
+          <label class="label">Due Date <span class="req">*</span></label>
+          <input formControlName="due_date" type="date" class="input" />
+          <span class="err-msg" *ngIf="isInvalid('due_date')">Due date is required.</span>
+        </div>
+
+      </div>
+
+      <!-- Priority indicator -->
+      <div class="priority-hint" *ngIf="form.get('priority')?.value">
+        <span class="p-dot" [class.p-high]="form.get('priority')?.value === 'High'"
+                            [class.p-med]="form.get('priority')?.value === 'Medium'"
+                            [class.p-low]="form.get('priority')?.value === 'Low'"></span>
+        <span class="p-label">{{ form.get('priority')?.value }} priority selected</span>
+      </div>
+
+      <!-- AI Prediction Banner -->
+      <div class="ai-banner ai-loading" *ngIf="predicting">
+        <span class="ai-spinner"></span>
+        <span>AI is estimating task duration…</span>
+      </div>
+      <div class="ai-banner" *ngIf="!predicting && predictedTime !== null">
+        <span class="ai-icon">🤖</span>
+        <span>AI Estimated Time: <strong>{{ predictedTime }} minutes</strong></span>
+      </div>
+      <div class="ai-banner ai-fallback" *ngIf="!predicting && predictedTime === null && form.get('category')?.value && form.get('priority')?.value">
+        <span class="ai-icon">⚠️</span>
+        <span>No prediction available — train the model with more data.</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button type="button" class="btn-reset" (click)="reset()" [disabled]="loading">Reset</button>
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          <span class="spinner" *ngIf="loading"></span>
+          <span>{{ loading ? 'Creating...' : 'Create Task' }}</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

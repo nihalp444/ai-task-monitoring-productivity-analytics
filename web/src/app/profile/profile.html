@@ -1,0 +1,90 @@
+<div class="profile-wrap">
+
+  <!-- Header -->
+  <div class="profile-header">
+    <h1 class="page-title">👤 Profile Info</h1>
+    <p class="page-sub">Your account details from the system</p>
+  </div>
+
+  <!-- Loading -->
+  <div class="skeleton-wrap" *ngIf="loading">
+    <div class="skeleton avatar-skel"></div>
+    <div class="skeleton-lines">
+      <div class="skeleton line-lg"></div>
+      <div class="skeleton line-md"></div>
+      <div class="skeleton line-sm"></div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-banner" *ngIf="error">⚠️ {{ error }}</div>
+
+  <!-- Profile Card -->
+  <div class="profile-card" *ngIf="!loading && user">
+
+    <!-- Avatar + Name -->
+    <div class="avatar-section">
+      <div class="avatar">{{ initials | uppercase }}</div>
+      <div>
+        <div class="full-name">{{ user.first_name }} {{ user.last_name }}</div>
+        <div class="user-email">{{ user.email }}</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+
+      <!-- <div class="info-item">
+        <span class="info-icon">🪪</span>
+        <div class="info-body">
+          <div class="info-label">User ID</div>
+          <div class="info-value mono">{{ user.id }}</div>
+        </div>
+      </div> -->
+
+      <div class="info-item">
+        <span class="info-icon">👤</span>
+        <div class="info-body">
+          <div class="info-label">First Name</div>
+          <div class="info-value">{{ user.first_name }}</div>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <span class="info-icon">👤</span>
+        <div class="info-body">
+          <div class="info-label">Last Name</div>
+          <div class="info-value">{{ user.last_name }}</div>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <span class="info-icon">✉️</span>
+        <div class="info-body">
+          <div class="info-label">Email Address</div>
+          <div class="info-value">{{ user.email }}</div>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <span class="info-icon">📱</span>
+        <div class="info-body">
+          <div class="info-label">Mobile Number</div>
+          <div class="info-value">{{ user.mobile_number || '—' }}</div>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <span class="info-icon">📅</span>
+        <div class="info-body">
+          <div class="info-label">Member Since</div>
+          <div class="info-value">{{ memberSince }}</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

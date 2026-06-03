@@ -1,0 +1,287 @@
+<!-- Header -->
+<div class="dash-header">
+  <div>
+    <h1 class="dash-title">AI Productivity Dashboard</h1>
+    <p class="dash-sub">Here's your intelligence summary for today</p>
+  </div>
+  <div class="header-right">
+    <div class="dash-date">{{ today | date:'EEEE, MMMM d' }}</div>
+    <button class="refresh-btn" (click)="refresh()" [disabled]="loading">
+      <span [class.spinning]="loading">↻</span> Refresh
+    </button>
+  </div>
+</div>
+
+<!-- Error Banner -->
+<div class="error-banner" *ngIf="error">⚠️ {{ error }}</div>
+
+<!-- Loading Skeletons -->
+<div class="loading-row" *ngIf="loading">
+  <div class="skeleton" *ngFor="let i of [1,2,3,4]"></div>
+</div>
+
+<!-- ── STATS CARDS ── -->
+<div class="stats-row" [hidden]="loading">
+  <div class="stat-card" *ngFor="let s of stats; let i = index" [style.--delay]="i * 0.07 + 's'">
+    <div class="stat-icon" [style.background]="s.color + '18'" [style.color]="s.color">{{ s.icon }}</div>
+    <div class="stat-info">
+      <div class="stat-label">{{ s.label }}</div>
+      <div class="stat-value" [style.color]="s.color">{{ s.value }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card score-card">
+    <div class="score-ring-wrap">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle cx="44" cy="44" r="36" fill="none" stroke="#1f1f1f" stroke-width="7"/>
+        <circle cx="44" cy="44" r="36" fill="none"
+          stroke="url(#scoreGrad)" stroke-width="7" stroke-linecap="round"
+          [attr.stroke-dasharray]="circumference"
+          [attr.stroke-dashoffset]="dashOffset"
+          transform="rotate(-90 44 44)" class="score-arc"/>
+        <defs>
+          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#f59e0b"/>
+            <stop offset="100%" stop-color="#fcd34d"/>
+          </linearGradient>
+        </defs>
+        <text x="44" y="49" text-anchor="middle" class="score-text">{{ score }}%</text>
+      </svg>
+    </div>
+    <div class="stat-info">
+      <div class="stat-label">Productivity Score</div>
+      <div class="score-status">{{ score >= 75 ? '🔥 On Fire' : score >= 50 ? '👍 Good' : score > 0 ? '💤 Low' : '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SUCCESS PROBABILITY CARD ── -->
+<div class="success-card" [hidden]="loading">
+
+  <!-- Loading -->
+  <div class="success-loading" *ngIf="successPredicting">
+    <span class="success-spinner"></span>
+    <span>AI is predicting your success probability…</span>
+  </div>
+
+  <!-- Result -->
+  <ng-container *ngIf="!successPredicting && successProbability !== null">
+    <div class="success-left">
+      <div class="success-icon">&#127919;</div>
+      <div>
+        <div class="success-label">Daily Success Probability</div>
+        <div class="success-sub">Based on today’s tasks, focus &amp; distraction data</div>
+      </div>
+    </div>
+
+    <div class="success-right">
+      <div class="success-bar-wrap">
+        <div class="success-bar-fill"
+          [class.bar-green]="successClass === 'green'"
+          [class.bar-yellow]="successClass === 'yellow'"
+          [class.bar-red]="successClass === 'red'"
+          [style.width.%]="successProbability">
+        </div>
+      </div>
+      <div class="success-value"
+        [class.val-green]="successClass === 'green'"
+        [class.val-yellow]="successClass === 'yellow'"
+        [class.val-red]="successClass === 'red'">
+        {{ successProbability }}%
+      </div>
+      <div class="success-badge"
+        [class.badge-green]="successClass === 'green'"
+        [class.badge-yellow]="successClass === 'yellow'"
+        [class.badge-red]="successClass === 'red'"
+        [title]="successClass === 'green' ? 'You are on track to complete most tasks today' : successClass === 'yellow' ? 'Moderate chance — stay focused' : 'Low chance — reduce distractions'">
+        {{ successClass === 'green' ? '🟢 On Track' : successClass === 'yellow' ? '🟡 Moderate' : '🔴 At Risk' }}
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Fallback -->
+  <div class="success-fallback" *ngIf="!successPredicting && successProbability === null">
+    <span>&#9888;&#65039;</span>
+    <span>No prediction available — train the model or add tasks first.</span>
+  </div>
+
+</div>
+
+<!-- ── USER TYPE CARD (Clustering) ── -->
+<div class="usertype-card" [hidden]="loading">
+
+  <div class="usertype-loading" *ngIf="clusterPredicting">
+    <span class="success-spinner"></span>
+    <span>AI is analyzing your productivity type…</span>
+  </div>
+
+  <ng-container *ngIf="!clusterPredicting && userType !== null">
+    <div class="usertype-left">
+      <div class="usertype-icon"
+        [class.icon-green]="userTypeClass === 'green'"
+        [class.icon-yellow]="userTypeClass === 'yellow'"
+        [class.icon-red]="userTypeClass === 'red'">&#129504;</div>
+      <div>
+        <div class="usertype-label">Productivity Type</div>
+        <div class="usertype-sub">Based on your focus, duration &amp; task patterns</div>
+      </div>
+    </div>
+    <div class="usertype-right">
+      <div class="usertype-badge"
+        [class.badge-green]="userTypeClass === 'green'"
+        [class.badge-yellow]="userTypeClass === 'yellow'"
+        [class.badge-red]="userTypeClass === 'red'"
+        [title]="userTypeClass === 'green' ? 'You maintain high focus with minimal distractions' : userTypeClass === 'yellow' ? 'Moderate productivity — room to improve focus' : 'High distraction rate detected — try focus sessions'">
+        {{ userTypeClass === 'green' ? '🟢' : userTypeClass === 'yellow' ? '🟡' : '🔴' }}
+        &#129504; User Type: {{ userType }}
+      </div>
+      <div class="usertype-tip"
+        [class.tip-green]="userTypeClass === 'green'"
+        [class.tip-yellow]="userTypeClass === 'yellow'"
+        [class.tip-red]="userTypeClass === 'red'">
+        {{ userTypeClass === 'green' ? 'Keep it up! You are in the top productivity tier.' :
+           userTypeClass === 'yellow' ? 'Reduce distractions to reach the next level.' :
+           'Try the Pomodoro technique to boost focus.' }}
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="success-fallback" *ngIf="!clusterPredicting && userType === null">
+    <span>&#9888;&#65039;</span>
+    <span>No cluster prediction — run train_cluster_model.py first.</span>
+  </div>
+
+</div>
+
+<!-- ── MAIN GRID: Trend + Category + Insights ── -->
+<div class="main-grid" [hidden]="loading">
+
+  <div class="charts-col">
+    <div class="card chart-card">
+      <div class="card-head">
+        <span class="card-title">📈 Task Creation Trend</span>
+        <span class="card-badge">Last 30 Days</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas #lineChart></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="card-head">
+        <span class="card-title">🍩 Category Distribution</span>
+        <span class="card-badge">All Time</span>
+      </div>
+      <div class="chart-wrap pie-wrap">
+        <canvas #pieChart></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="insights-col">
+    <div class="card insights-card">
+      <div class="card-head">
+        <span class="card-title">🤖 AI Insights</span>
+        <span class="ai-live">● Live</span>
+      </div>
+      <div *ngIf="insightsLoading" class="success-loading">
+        <span class="success-spinner"></span>
+        <span>AI is generating insights…</span>
+      </div>
+      <ng-container *ngIf="!insightsLoading">
+        <div class="insights-list" *ngIf="insights.length; else noInsights">
+          <div class="insight-item" *ngFor="let ins of insights; let i = index" [style.--delay]="i * 0.08 + 's'">
+            <div class="insight-dot" style="background:#f59e0b"></div>
+            <p class="insight-text">{{ ins }}</p>
+          </div>
+        </div>
+        <ng-template #noInsights>
+          <p class="empty-msg">Complete tasks to generate insights.</p>
+        </ng-template>
+      </ng-container>
+    </div>
+
+    <div class="card reco-card">
+      <div class="card-head">
+        <span class="card-title">💡 Smart Recommendations</span>
+      </div>
+      <div *ngIf="insightsLoading" class="success-loading">
+        <span class="success-spinner"></span>
+        <span>Generating recommendations…</span>
+      </div>
+      <ng-container *ngIf="!insightsLoading">
+        <div class="reco-list" *ngIf="recommendations.length; else noReco">
+          <div class="reco-item" *ngFor="let r of recommendations">
+            <span class="reco-icon">💡</span>
+            <span class="reco-text">{{ r }}</span>
+          </div>
+        </div>
+        <ng-template #noReco>
+          <p class="empty-msg">No recommendations yet.</p>
+        </ng-template>
+      </ng-container>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── SECOND CHART ROW: Weekly Bar + Focus/Distraction ── -->
+<div class="chart-row" [hidden]="loading">
+
+  <!-- Weekly Tasks Bar Chart -->
+  <div class="card chart-card">
+    <div class="card-head">
+      <span class="card-title">📊 Weekly Task Completions</span>
+      <span class="card-badge">Last 7 Days</span>
+    </div>
+    <!-- canvas always in DOM so static ViewChild resolves; hidden only when no data -->
+    <div class="chart-wrap" [hidden]="noWeeklyData">
+      <canvas #barChart></canvas>
+    </div>
+    <!-- <div class="no-data" [hidden]="!noWeeklyData">
+      <span class="no-data-icon">📭</span>
+      <p>No completed tasks in the last 7 days</p>
+    </div> -->
+  </div>
+
+  <!-- Focus vs Distraction Line Chart -->
+  <div class="card chart-card">
+    <div class="card-head">
+      <span class="card-title">🧠 Focus vs Distraction</span>
+      <span class="card-badge">Last 7 Days</span>
+    </div>
+    <!-- canvas always in DOM so static ViewChild resolves; hidden only when no data -->
+    <div class="chart-wrap" [hidden]="noFocusData">
+      <canvas #focusChart></canvas>
+    </div>
+    <!-- <div class="no-data" [hidden]="!noFocusData">
+      <span class="no-data-icon">📭</span>
+      <p>No focus data available yet</p>
+    </div> -->
+  </div>
+
+</div>
+
+<!-- ── HEATMAP ── -->
+<!-- <div class="card heatmap-card" [hidden]="loading">
+  <div class="card-head">
+    <span class="card-title">🗓️ Activity Heatmap</span>
+    <span class="card-badge">Last 30 Days</span>
+  </div>
+  <div class="heatmap-grid">
+    <div class="heat-cell"
+      *ngFor="let cell of heatmapCells"
+      [class]="'heat-' + cell.level"
+      [title]="cell.date">
+    </div>
+  </div>
+  <div class="heat-legend">
+    <span class="legend-label">Less</span>
+    <div class="heat-cell heat-0"></div>
+    <div class="heat-cell heat-1"></div>
+    <div class="heat-cell heat-2"></div>
+    <div class="heat-cell heat-3"></div>
+    <div class="heat-cell heat-4"></div>
+    <span class="legend-label">More</span>
+  </div>
+</div> -->

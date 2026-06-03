@@ -1,0 +1,70 @@
+<div class="layout">
+
+  <aside class="sidebar" *ngIf="showSidebar" [class.collapsed]="collapsed">
+
+    <button class="toggle-btn" (click)="toggle()" [title]="collapsed ? 'Expand' : 'Collapse'">
+      {{ collapsed ? '▶' : '◀' }}
+    </button>
+
+    <div class="brand">
+      <span class="brand-icon">✦</span>
+      <span class="brand-name" *ngIf="!collapsed">TaskAI</span>
+    </div>
+
+    <nav class="nav">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" [title]="collapsed ? 'Dashboard' : ''">
+        <span class="icon">📊</span>
+        <span class="label" *ngIf="!collapsed">Dashboard</span>
+      </a>
+      <a routerLink="/tasks" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" [title]="collapsed ? 'Tasks' : ''">
+        <span class="icon">✅</span>
+        <span class="label" *ngIf="!collapsed">Tasks</span>
+      </a>
+      <a routerLink="/tasks/create" routerLinkActive="active" class="nav-item" [title]="collapsed ? 'Create Task' : ''">
+        <span class="icon">➕</span>
+        <span class="label" *ngIf="!collapsed">Create Task</span>
+      </a>
+    </nav>
+
+  </aside>
+
+  <main class="content" [class.full]="!showSidebar" [class.shifted]="showSidebar && !collapsed" [class.shifted-sm]="showSidebar && collapsed">
+
+    <!-- Top Bar -->
+    <header class="topbar" *ngIf="showSidebar">
+      <span class="page-title">Task AI System</span>
+
+      <div class="profile-wrap">
+        <span class="user-name">{{ user?.first_name }} {{ user?.last_name }}</span>
+        <button class="avatar-btn" (click)="togglePopup()">
+          {{ user?.first_name?.charAt(0) | uppercase }}{{ user?.last_name?.charAt(0) | uppercase }}
+        </button>
+
+        <!-- Profile Popup -->
+        <div class="popup" *ngIf="popupOpen">
+          <div class="popup-header">
+            <div class="popup-avatar">
+              {{ user?.first_name?.charAt(0) | uppercase }}{{ user?.last_name?.charAt(0) | uppercase }}
+            </div>
+            <div>
+              <p class="popup-name">{{ user?.first_name }} {{ user?.last_name }}</p>
+              <p class="popup-email">{{ user?.email }}</p>
+            </div>
+          </div>
+          <hr class="popup-divider">
+          <button class="popup-item" routerLink="/profile" (click)="popupOpen=false">
+            <span>👤</span> Profile Info
+          </button>
+          <button class="popup-item logout-item" (click)="logout()">
+            <span>🔓</span> Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+</div>
