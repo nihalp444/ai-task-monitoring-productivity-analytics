@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Web
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.3.
@@ -57,3 +58,43 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+=======
+# ai-task-monitoring-productivity-analytics
+Intelligent productivity analytics platform featuring task tracking, behavioral logging, time management, real-time dashboards, and AI-based performance evaluation.
+
+# AI Task Monitoring & Productivity Analytics System
+
+A full-stack productivity analytics platform designed to monitor tasks, track user behavior, analyze work patterns, and generate AI-driven productivity insights.
+
+## Features
+
+- Task Management
+- Time Tracking
+- User Activity Monitoring
+- Behavioral Logging
+- Productivity Score Generation
+- Real-Time Analytics Dashboard
+- Data Visualization with Chart.js
+- RESTful API Architecture
+- PostgreSQL Database Integration
+
+## Tech Stack
+
+### Frontend
+- Angular 16
+- TypeScript
+- Chart.js
+
+### Backend
+- FastAPI
+- Python
+- SQLAlchemy
+
+### Database
+- PostgreSQL
+
+### Analytics
+- Rule-Based AI Analytics Engine
+- Productivity Scoring
+- Performance Metrics Generation
+>>>>>>> 44d88ccb857a7d7f25dd6cc8244eec314d043595
